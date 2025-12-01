@@ -1,0 +1,27 @@
+[project]
+name = "acie"
+version = "0.1.0"
+description = "Autonomous Competitive Intelligence Engine "
+authors = [{ name = "Himani Kapoor", email = "himani.kapoor11@gmail.com" }]
+requires-python = ">=3.10,<3.14"
+dependencies = [
+    "crewai-tools>=1.6.1",
+    "crewai[tools]==1.6.1",
+    "langchain-openai>=1.1.0",
+    "python-dotenv>=1.2.1",
+]
+
+[project.scripts]
+acie = "acie.main:run"
+run_crew = "acie.main:run"
+train = "acie.main:train"
+replay = "acie.main:replay"
+test = "acie.main:test"
+run_with_trigger = "acie.main:run_with_trigger"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.crewai]
+type = "crew"

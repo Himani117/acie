@@ -1,0 +1,22 @@
+research_task: 
+  description: > 
+    1. Search for the top 3-5 direct competitors to {topic}. 
+    2. For each competitor, find their pricing page and feature list. 
+    3. Extract specific data: Monthly price, User limits, Top 3 features. 
+    4. IMPORTANT: You must use the ScrapeWebsiteTool to verify data. 
+  expected_output: > 
+    A raw data dossier containing a list of competitors with their  
+    URL, pricing details, and feature lists. 
+  agent: market_researcher 
+
+reporting_task: 
+  description: > 
+    Analyze the data provided by the research_task. 
+    1. Create a comparison table of features. 
+    2. Perform a SWOT analysis for {topic} based on the market. 
+    3. Identify 2 key market gaps. 
+  expected_output: > 
+    A professional Markdown report titled "Competitive Analysis: {topic}". 
+    Must include an Executive Summary, Comparison Table, and SWOT. 
+  agent: strategic_analyst 
+  context: [research_task]
