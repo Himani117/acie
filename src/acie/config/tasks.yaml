@@ -1,22 +1,112 @@
-research_task: 
-  description: > 
-    1. Search for the top 3-5 direct competitors to {topic}. 
-    2. For each competitor, find their pricing page and feature list. 
-    3. Extract specific data: Monthly price, User limits, Top 3 features. 
-    4. IMPORTANT: You must use the ScrapeWebsiteTool to verify data. 
-  expected_output: > 
-    A raw data dossier containing a list of competitors with their  
-    URL, pricing details, and feature lists. 
-  agent: market_researcher 
+client_intake_and_validation:
+  name: Client Intake and Validation
+  agent: client_intake_manager
+  description: >
+    1. Record the company name exactly (legal and brand variants)
+    2. Identify if this is a parent entity or subsidiary
+    3. Log client constraints (timeline, geography, confidentiality)
+    Note: Confirm correct company entity (no ambiguity)
+  expected_output: >
+    A raw data dossier of:
+    1. Client Intake Record
+    2. Initial Constraints Log
+    3. Validation Status
+  guardrail: >
+    Your task must:
+    1. Parse provided company name.
+    2. Cross-check naming variants internally (no enrichment beyond validation).
+    3. Classify entity relationship (parent/subsidiary/unknown).
+    4. Structure constraints exactly as stated.
+    5. Flag ambiguity if unresolved.
 
-reporting_task: 
-  description: > 
-    Analyze the data provided by the research_task. 
-    1. Create a comparison table of features. 
-    2. Perform a SWOT analysis for {topic} based on the market. 
-    3. Identify 2 key market gaps. 
+baseline_company_discovery:
+  name: Baseline Company Discovery
+  agent: market_research_analyst
+  description: >
+    1. Identify official company presence (website, regulatory filings)
+    2. Collect industry classification
+    3. Identify headquarters location and operating geographies
+    4. Capture ownership structure and size indicators
+    5. Extract public positioning statements
   expected_output: > 
-    A professional Markdown report titled "Competitive Analysis: {topic}". 
-    Must include an Executive Summary, Comparison Table, and SWOT. 
-  agent: strategic_analyst 
-  context: [research_task]
+    Structured bullet points or JSON
+    1. Company Intelligence Brief (v1)
+    2. Source Log with URLs and credibility rating
+    3. Entity Disambiguation Notes
+  guardrail: >
+    Your task must:
+    1. Minimum 3 independent public sources
+    2. Each fact mapped to a source
+    3. No subjective interpretation
+    4. Explicit entity disambiguation status
+  context: client_intake_and_validation
+
+product_or_service_signal_extraction:
+  name: Product or Service Signal Extraction
+  agent: market_research_analyst_two
+  description: >
+    1. Extract stated products/services from:
+      - Website pages
+      - Marketing material
+      - Job postings
+      - Case studies
+    2. Identify primary vs secondary offerings
+    3. Capture pricing or packaging signals (if public)
+  expected_output: >
+    Structured bullet points or JSON
+    1. Raw Product / Service List
+    2. Offering Signal Notes
+    3. Coverage Confidence Indicator
+  guardrail: >
+    Your task must:
+    1. Each product or service linked to at least one source
+    2. Ambiguous offerings explicitly marked
+    3. Coverage confidence clearly stated
+  context: [baseline_company_discovery]
+
+initial_competitor_identification:
+  name: Initial Competitor Identification
+  agent: market_research_analyst_three
+  description: >
+    1. Identify competitors using “customers also consider” signals
+    2. Identify competitors from industry listings
+    3. Identify competitors from comparison and review articles
+    4. Segment competitors by geography
+    5. Segment competitors by service overlap
+    6. Segment competitors by market tier
+  expected_output: >
+    Structured bullet points or JSON
+    1. Raw Competitor List / Competitor Universe List
+    2. Competitor Segmentation Notes / table
+    3. Inclusion / Exclusion Rationale
+    4. Coverage Confidence Indicator
+  guardrail: >
+    Your task must have:
+    1. Each competitor linked to at least one source
+    2. Explicit inclusion rationale per competitor
+    3. Clear exclusion notes for close non-competitors
+  context: [baseline_company_discovery, product_or_service_signal_extraction]
+
+business_model_and_market_inference:
+  name: Business Model & Market Inference
+  agent: strategy_and_industry_analyst
+  description: >
+    1. Infer :
+      - Business model 
+      - Target customer segments
+      - Value proposition
+    2. Map offerings into industry-standard taxonomy
+    3. Identify likely revenue drivers
+    4. Identify market size and growth potential
+    5. Evaluate competitive positioning
+  expected_output: >
+    Structured bullet points or JSON
+    1. Inferred Business Model Canvas
+    2. Product-Market Mapping
+    3. Inference Confidence Scores
+  guardrail: >
+    Your task must have:
+    1. All inferences labeled and scored
+    2. No assumption presented as fact
+    3. Each inference must include a confidence score
+  context: [initial_competitor_identification]
