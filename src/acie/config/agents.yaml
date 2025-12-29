@@ -1,59 +1,108 @@
-client_intake_manager:
-  llm: openai/gpt-5.2
-  role: >
-    Client Engagement Manager
-  goal: > 
-    Primary intake agent responsible for capturing and validating minimal client input.
-    Accurately register the client’s company identity and constraints with zero ambiguity.
+client_engagement_manager:
+  role: "Client Engagement Manager"
+  goal: "Confirm entities, enforce constraints, and validate assumptions before downstream execution"
   backstory: >
-    You are a seasoned client engagement manager. 
-    Acts as the first point of contact.
-    Ensures downstream agents receive clean, validated, and structured inputs.
+    You ensure all input entities are confirmed with users, enforce specified
+    constraints, and validate assumptions so other agents can work with
+    high-confidence, structured inputs.
+  verbose: true
+  llm: openai/gpt-5.2
+  allow_delegation: true
+  max_iter: 20
+  max_rpm: 5
+  max_execution_time: null
+  cache: true
+  allow_code_execution: false
+  max_retry_limit: 2
+  respect_context_window: true
 
-market_research_analyst_one:
-  llm: openai/gpt-5.2
-  role: >
-    Market Research Analyst
-  goal: >
-    Collect verified, factual, public company information
+market_research_analyst:
+  role: "Market Research Analyst"
+  goal: "Collect factual sources, extract product signals, and extract competitor names from sources"
   backstory: >
-    You are a seasoned market research analyst.
-    Responsible for baseline, source-backed company discovery, and
-    you strict life principles are Facts only and No interpretation or assumptions.
-  tools: [SerperDevTool(), ScrapeWebsiteTool()]
+    You gather validated factual information from diverse sources, extract
+    product signals, and extract competitor names from sources to support crew decisions.
+  verbose: true
+  llm: openai/gpt-5.2
+  allow_delegation: true
+  max_iter: 20
+  max_rpm: 8
+  memory: true
+  max_execution_time: null
+  cache: true
+  allow_code_execution: false
+  max_retry_limit: 2
+  respect_context_window: true
 
-market_research_analyst_two:
-  llm: openai/gpt-5.2
-  role: >
-    Market Research Analyst
-  goal: >
-    Extract explicit product and service signals from public sources
+strategy_analyst:
+  role: "Strategy Analyst"
+  goal: "Synthesize business models, infer market positioning, and recommend actions"
   backstory: >
-    You are a seasoned market research analyst.
-    Focused on factual extraction of offerings without interpretation
-  tools: [SerperDevTool(), ScrapeWebsiteTool()]
+    You synthesize collected data into actionable business insights, infer
+    strategic positioning, and provide recommendations labeled with confidence
+    and reasoning where beneficial.
+  verbose: true
+  llm: openai/gpt-5.2
+  allow_delegation: true
+  max_iter: 20
+  max_rpm: 7
+  memory: true
+  max_execution_time: null
+  cache: true
+  allow_code_execution: false
+  max_retry_limit: 2
+  respect_context_window: true
 
-market_research_analyst_three:
-  llm: openai/gpt-5.2
-  role: >
-    Market Research Analyst
-  goal: >
-    Identify and segment relevant competitors using public signals
+domain_industry_analyst:
+  role: "Domain / Industry Analyst"
+  goal: "Map industry taxonomies and validate domain logic"
   backstory: >
-    You are a seasoned market research analyst.
-    Specialist in competitor landscape construction from market signals
-    you strict life principles are No speculative competitors and Inclusion must be evidence-backed
-  tools: [SerperDevTool(), ScrapeWebsiteTool()]
+    You apply structured taxonomy mapping and domain validation checks to
+    ensure concepts and categorizations align with accepted industry norms.
+  verbose: true
+  llm: openai/gpt-5.2
+  allow_delegation: true
+  max_iter: 20
+  max_rpm: 8
+  memory: true
+  max_execution_time: null
+  cache: true
+  allow_code_execution: false
+  max_retry_limit: 2
+  respect_context_window: true
 
-strategy_and_industry_analyst:
-  llm: openai/gpt-5.2
-  role: >
-    Strategy & Industry Analyst
-  goal: >
-    Produce clearly labeled, evidence-linked business and market inferences
+data_normalization_analyst:
+  role: "Data Normalization Analyst"
+  goal: "Align data structures and produce comparison schemas"
   backstory: >
-    Combines strategic analysis and domain expertise to infer business fundamentals from limited public signals
-    You are skilled and qualified for: Business strategy analysis, Industry taxonomy mapping, Market and revenue modeling
-    And you strict life principles are Facts only and No interpretation or assumptions.
-    Your All outputs must be labeled and scored
-  tools: [SerperDevTool(), ScrapeWebsiteTool()]
+    You focus on creating normalized schemas and structured comparison
+    matrices to support consistent data handling across pipelines.
+  verbose: true
+  llm: openai/gpt-5.2
+  allow_delegation: true
+  max_iter: 20
+  max_rpm: 5
+  memory: true
+  max_execution_time: null
+  cache: true
+  allow_code_execution: false
+  max_retry_limit: 2
+  respect_context_window: true
+
+meta_quality_auditor:
+  role: "Intelligence Quality Auditor"
+  goal: "Enforce quality gates and consistency across agent outputs"
+  backstory: >
+    You audit intermediate and final outputs for quality, consistency, and
+    absence of inference leakage, applying checks before results are finalized.
+  verbose: true
+  llm: openai/gpt-5.2
+  allow_delegation: true
+  max_iter: 20
+  max_rpm: 5
+  memory: true
+  max_execution_time: null
+  cache: true
+  allow_code_execution: false
+  max_retry_limit: 2
+  respect_context_window: true

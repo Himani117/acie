@@ -1,112 +1,183 @@
-client_intake_and_validation:
-  name: Client Intake and Validation
-  agent: client_intake_manager
+client_intake:
   description: >
-    1. Record the company name exactly (legal and brand variants)
-    2. Identify if this is a parent entity or subsidiary
-    3. Log client constraints (timeline, geography, confidentiality)
-    Note: Confirm correct company entity (no ambiguity)
+    Intake and interpret the raw client input into structured engagement information.
+    The client has provided the following company name or URL: {{topic}}
+    Clarify any ambiguous company names or brand variants, identify parent or subsidiary
+    relationships, and log all client-stated constraints.
   expected_output: >
-    A raw data dossier of:
-    1. Client Intake Record
-    2. Initial Constraints Log
-    3. Validation Status
+    A structured response containing an engagement identifier, a single confirmed and
+    unambiguous company entity, and a logged list of client constraints.
+  agent: client_engagement_manager
   guardrail: >
-    Your task must:
-    1. Parse provided company name.
-    2. Cross-check naming variants internally (no enrichment beyond validation).
-    3. Classify entity relationship (parent/subsidiary/unknown).
-    4. Structure constraints exactly as stated.
-    5. Flag ambiguity if unresolved.
+    The output must:
+    - Include a parsed company name that is unambiguous
+    - Classify the entity relationship (parent/subsidiary/unknown)
+    - Log all stated client constraints exactly as provided
+    - Flag any unresolved ambiguity explicitly
 
-baseline_company_discovery:
-  name: Baseline Company Discovery
+baseline_discovery:
+  description: >
+    Perform baseline discovery on the confirmed company entity (originally provided as: {{topic}})
+    using publicly available and reliable external sources. Produce a factual intelligence brief
+    without inference.
+  expected_output: >
+    A company intelligence brief including verified facts, a source log with at least
+    three sources, and entity disambiguation notes.
   agent: market_research_analyst
-  description: >
-    1. Identify official company presence (website, regulatory filings)
-    2. Collect industry classification
-    3. Identify headquarters location and operating geographies
-    4. Capture ownership structure and size indicators
-    5. Extract public positioning statements
-  expected_output: > 
-    Structured bullet points or JSON
-    1. Company Intelligence Brief (v1)
-    2. Source Log with URLs and credibility rating
-    3. Entity Disambiguation Notes
+  context:
+    - client_intake
   guardrail: >
-    Your task must:
-    1. Minimum 3 independent public sources
-    2. Each fact mapped to a source
-    3. No subjective interpretation
-    4. Explicit entity disambiguation status
-  context: client_intake_and_validation
+    The output must:
+    - Be supported by at least three independent public sources
+    - Map each fact to a specific source with URLs
+    - Avoid subjective interpretation
+    - Include explicit entity disambiguation notes
 
-product_or_service_signal_extraction:
-  name: Product or Service Signal Extraction
-  agent: market_research_analyst_two
+product_signal_extraction:
   description: >
-    1. Extract stated products/services from:
-      - Website pages
-      - Marketing material
-      - Job postings
-      - Case studies
-    2. Identify primary vs secondary offerings
-    3. Capture pricing or packaging signals (if public)
+    Extract all observable products and services from the baseline intelligence brief.
+    Each extracted signal must be directly supported by a cited source.
   expected_output: >
-    Structured bullet points or JSON
-    1. Raw Product / Service List
-    2. Offering Signal Notes
-    3. Coverage Confidence Indicator
+    A list of raw product and service offerings with supporting evidence, signal notes,
+    and a coverage confidence assessment.
+  agent: market_research_analyst
+  context:
+    - baseline_discovery
   guardrail: >
-    Your task must:
-    1. Each product or service linked to at least one source
-    2. Ambiguous offerings explicitly marked
-    3. Coverage confidence clearly stated
-  context: [baseline_company_discovery]
+    The output must:
+    - Link each product or service to at least one cited source
+    - Mark any ambiguous offerings explicitly
+    - Include a clear coverage confidence indicator
 
-initial_competitor_identification:
-  name: Initial Competitor Identification
-  agent: market_research_analyst_three
+competitor_identification:
   description: >
-    1. Identify competitors using “customers also consider” signals
-    2. Identify competitors from industry listings
-    3. Identify competitors from comparison and review articles
-    4. Segment competitors by geography
-    5. Segment competitors by service overlap
-    6. Segment competitors by market tier
+    Identify direct competitors and substitutes based on the extracted product and
+    service signals. Segment competitors logically and document inclusion rationale.
   expected_output: >
-    Structured bullet points or JSON
-    1. Raw Competitor List / Competitor Universe List
-    2. Competitor Segmentation Notes / table
-    3. Inclusion / Exclusion Rationale
-    4. Coverage Confidence Indicator
+    A segmented competitor universe with justification for inclusion or exclusion of
+    each entity.
+  agent: market_research_analyst
+  context:
+    - product_signal_extraction
   guardrail: >
-    Your task must have:
-    1. Each competitor linked to at least one source
-    2. Explicit inclusion rationale per competitor
-    3. Clear exclusion notes for close non-competitors
-  context: [baseline_company_discovery, product_or_service_signal_extraction]
+    The output must:
+    - Link each competitor to at least one source
+    - Provide explicit rationale for including each competitor
+    - Provide clear exclusion notes for close non-competitors
 
-business_model_and_market_inference:
-  name: Business Model & Market Inference
-  agent: strategy_and_industry_analyst
+business_model_inference:
   description: >
-    1. Infer :
-      - Business model 
-      - Target customer segments
-      - Value proposition
-    2. Map offerings into industry-standard taxonomy
-    3. Identify likely revenue drivers
-    4. Identify market size and growth potential
-    5. Evaluate competitive positioning
+    Infer the company’s business model and map offerings to target markets using observed
+    signals. Assign confidence levels to all inferences.
   expected_output: >
-    Structured bullet points or JSON
-    1. Inferred Business Model Canvas
-    2. Product-Market Mapping
-    3. Inference Confidence Scores
+    An inferred business model canvas, product-market mapping, and confidence scores
+    for each inference.
+  agent: strategy_analyst
+  context:
+    - baseline_discovery
+    - product_signal_extraction
   guardrail: >
-    Your task must have:
-    1. All inferences labeled and scored
-    2. No assumption presented as fact
-    3. Each inference must include a confidence score
-  context: [initial_competitor_identification]
+    The output must:
+    - Label all inferences
+    - Assign a confidence score to each inference
+    - Avoid presenting assumptions as facts
+
+assumption_validation:
+  description: >
+    Validate inferred business model assumptions and confirm approved analytical scope.
+    Clearly separate validated assumptions from rejected ones.
+  expected_output: >
+    A list of validated assumptions, rejected assumptions, and an approved project scope.
+  agent: client_engagement_manager
+  context:
+    - business_model_inference
+  guardrail: >
+    The output must:
+    - Clearly list validated assumptions
+    - Clearly list rejected assumptions
+    - Specify the approved project scope based on validation results
+
+normalization:
+  description: >
+    Normalize client and competitor offerings into a standardized taxonomy and generate
+    comparison artifacts to enable benchmarking.
+  expected_output: >
+    A standardized service taxonomy, feature comparison tables, and a geography matrix.
+  agent: data_normalization_analyst
+  context:
+    - assumption_validation
+    - competitor_identification
+  guardrail: >
+    The output must:
+    - Standardize all service offerings into a consistent taxonomy
+    - Include feature comparison tables mapped to the taxonomy
+    - Include a geography matrix covering client and competitor offerings
+
+benchmarking:
+  description: >
+    Benchmark the client against competitors using the standardized taxonomy and produce
+    structured scorecards and SWOT analysis.
+  expected_output: >
+    Benchmark scorecards and a client-centric SWOT analysis.
+  agent: strategy_analyst
+  context:
+    - normalization
+  guardrail: >
+    The output must:
+    - Include benchmark scorecards tied to taxonomy features
+    - Include a client-centric SWOT analysis
+    - Avoid unsupported claims not grounded in the taxonomy data
+
+insight_synthesis:
+  description: >
+    Synthesize benchmarking results into strategic insights and document key risks and
+    opportunities.
+  expected_output: >
+    Insight narratives and a structured risk and opportunity register.
+  agent: strategy_analyst
+  context:
+    - benchmarking
+  guardrail: >
+    The output must:
+    - Provide coherent insight narratives
+    - Include a structured register of risks and opportunities
+    - Avoid speculative or unsupported insights
+
+recommendations:
+  description: >
+    Generate actionable strategic recommendations with prioritization and execution
+    guidance.
+  expected_output: >
+    A recommendation framework, impact-effort matrix, and strategic roadmap.
+  agent: strategy_analyst
+  context:
+    - insight_synthesis
+  guardrail: >
+    The output must:
+    - Produce a recommendation framework aligned to insights
+    - Include an impact-effort matrix
+    - Provide a strategic roadmap with clear execution guidance
+
+final_audit_and_reporting:
+  description: >
+    Perform a final quality audit across all outputs and compile executive-ready reporting
+    materials.
+  expected_output: >
+    An executive summary, final consolidated report, and methodology appendix.
+  agent: meta_quality_auditor
+  context:
+    - client_intake
+    - baseline_discovery
+    - product_signal_extraction
+    - competitor_identification
+    - business_model_inference
+    - assumption_validation
+    - normalization
+    - benchmarking
+    - insight_synthesis
+    - recommendations
+  guardrail: >
+    The output must:
+    - Include a clear executive summary
+    - Include a final consolidated report
+    - Include a comprehensive methodology appendix
